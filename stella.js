@@ -5,10 +5,10 @@ chrome.tabs.query({lastFocusedWindow: true, active: true},tabDetails);
 icons=['house','building','factory','ruin','bed','camping','caravan','car',
 'truck','tractor','bus','train','motorbike','bicycle','walking','plane',
 'holidays','globe','world','map','location','weather','temperature','water',
-'energy','solar','battery','windmill','leaf','tree','conifer','flowers',
-'animals','birds','insects','pets','fish','DIY','sport','puzzle',
-'books','clothes','shopping','food','drink','money','moneybox','math',
-'science','electronics','audio','music','guitar','art','photos','video',
+'energy','solar','battery','windmill','leaf','tree','flowers','animals',
+'birds','insects','pets','fish','DIY','sport','puzzle','books',
+'clothes','shopping','food','drink','money','moneybox','math','science',
+'electronics','audio','music','guitar','art','photos','camera','video',
 'tv','games','smartphone','phone','computer','health','ideas','coding'];
 // var selection=[]; // selected icons
 var selection=[];
@@ -30,6 +30,7 @@ id('stamp').addEventListener('click',function() {
 	window.setTimeout(function(){window.close();},2000);
 });
 id('search').addEventListener('click',function() {
+	checklist=[];
 	for(var i=0;i<selection.length;i++) {
 		console.log('add label $'+icons[selection[i]]);
 		checklist.push(icons[selection[i]]);
@@ -50,7 +51,10 @@ id('icons').addEventListener('click',function(event) {
 	console.log('icon '+x+' on row '+y);
 	var n=y*8+x;
 	console.log('icon '+n);
-	if((n<0)||(n>63)) message('miss!');
+	if((n<0)||(n>63)) {
+		message('miss!');
+		return;
+	}
 	var i=selection.indexOf(n);
 	if(i<0) {
 		selection.push(n);
@@ -109,7 +113,6 @@ function listMatches(bookmarks) {
 	var html='<b>Search for</b>';
 	for(var i in selection) html+='<img src="icons/'+icons[selection[i]]+'.png" align="middle" >';
 	id('listHeader').innerHTML=html;
-	
 	id('list').innerHTML='';
 	for(i=0;i<bookmarks.length;i++) {
 		page=bookmarks[i].title;
@@ -125,7 +128,7 @@ function listMatches(bookmarks) {
 			listItem.index=i; // index in bookmarks
 			html=page.substring(0,page.indexOf('$'));
 			html+='<img src="icons/close.png" class="deleteIcon">';
-			html+='<br><small>'+url.substring(0,url.indexOf('.'))+'</small>';
+			html+='<br><small>'+url.substring(0,50)+'</small>';
 			listItem.innerHTML=html;
 			listItem.addEventListener('click',function(e) {
 				if(e.x>380) {
@@ -147,6 +150,8 @@ function listMatches(bookmarks) {
 	if(found<1) id('list').innerHTML+='NO MATCHES';
 	id('listPage').style.display='block';
 	checklist=[];
+	selection=[];
+	console.log('selection and checklist cleared');
 }
 function displayPage(index) {
 	console.log('display page '+bookmarks[i].title+'; URL: '+bookmarks[i].url);
