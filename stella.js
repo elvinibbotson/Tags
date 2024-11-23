@@ -131,16 +131,18 @@ function listMatches(bookmarks) {
 			html+='<br><small>'+url.substring(0,50)+'</small>';
 			listItem.innerHTML=html;
 			listItem.addEventListener('click',function(e) {
+				var item=bookmarks[this.index];
 				if(e.x>380) {
-					if(confirm('DELETE BOOKMARK?')) {
-						console.log('DELETE BOOKMARK');
-						window.close();
-					}
+					chrome.bookmarks.remove(bookmarks[this.index].id);
+					bookmarks.splice(this.index,1);
+					window.close();
 					return;
 				}
-	 			console.log('display page '+bookmarks[this.index].title+'; URL: '+bookmarks[this.index].url);
-	 			chrome.tabs.create({url: bookmarks[this.index].url});
-	 			window.close();
+				else {
+	 				console.log('display page '+bookmarks[this.index].title+'; URL: '+bookmarks[this.index].url);
+	 				chrome.tabs.create({url: bookmarks[this.index].url});
+	 				window.close();
+				}
 			});
 			id('list').appendChild(listItem);
 		}
@@ -155,6 +157,12 @@ function listMatches(bookmarks) {
 }
 function displayPage(index) {
 	console.log('display page '+bookmarks[i].title+'; URL: '+bookmarks[i].url);
+}
+function deleteBookmark(bookmark) {
+	console.log('delete '+bookmark.title);
+	chrome.bookmarks.remove(bookmark.id);
+	// bookmarks.splice(n,1);
+	listMatches(bookmarks);
 }
 function message(text) {
 	id('message').innerText=text;
