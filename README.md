@@ -8,4 +8,4 @@ while searching with both tags will just list sites with both tags.<br><br>
 Tags is a browser extension and can be used with desktop/laptop/Chromebook browsers or on a phone or tablet using a browser such as Kiwi which accepts extensions.
 Pinning Tags in your browser lets you tag a page in a couple of clicks.<br><br>
 The mechanism involves creating bookmarks in a dedicated Tags bookmarks folder, adding tags|$tags to the bookmark titles.
-Download the <a href='Tags.crx'>extension file and add it to yoour browser's extensions.
+Download the <a href='Tags.crx'>extension</a> and add it to yoour browser's extensions.
