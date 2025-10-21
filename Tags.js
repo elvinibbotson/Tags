@@ -5,61 +5,17 @@ chrome.tabs.query({lastFocusedWindow: true, active: true},tabDetails);
 icons=['home','building','history','car','bike','train',
 'plane','globe','weather','health','leaf','tree',
 'energy','science','books','games','phone','computer',
-'DIY','sport','fashion','shopping','foodanddrink','money',
+'DIY','sport','fashion','shopping','food+drink','money',
 'music','art','graphics','camera','film','tv'];
 var selection=[];
-id('tag').addEventListener('click',function() { // save tagged bookmark
-	if(tab.title.length>30) tab.title=tab.title.substr(0,28)+'..';
-	if(selection.length<1) return;
-	for(var i=0;i<selection.length;i++) {
-		console.log('select '+icons[selection[i]]);
-		tab.title+='$'+icons[selection[i]];
-	}
-	console.log('title: '+tab.title+'\nurl: '+tab.url);
-	addBookmark(folder,tab.title,tab.url);
-	message('SAVED');
-	window.setTimeout(function(){window.close();},2000);
-});
-id('search').addEventListener('click',function() { // search bookmarks for matching tags
-	checklist=[];
-	for(var i=0;i<selection.length;i++) {
-		console.log('add label $'+icons[selection[i]]);
-		checklist.push(icons[selection[i]]);
-	}
-	console.log('get bookmarks in Tags folder - id: '+folder);
-	chrome.bookmarks.getChildren(folder).then(listMatches);
-});
-id('close').addEventListener('click',function() { // close bookmarks list
-	for(var i=0;i<icons.length;i++) id('icons').childNodes[i].style.backgroundColor='white';
-	id('listPage').style.display='none';
-});
-id('icons').addEventListener('click',function(event) { // tap icon
-	var x=event.x-5;
-	var y=event.y;
-	console.log('click at '+x+','+y);
-	x=Math.floor(x/50); // was x=Math.floor(x/50);
-	y=Math.floor((y-75)/53);// was y=Math.floor((y-90)/50);
-	console.log('icon '+x+' on row '+y);
-	var n=y*6+x;
-	console.log('icon '+n);
-	if((n<0)||(n>63)) {
-		message('miss!');
-		return;
-	}
-	var i=selection.indexOf(n);
-	if(i<0) {
-		selection.push(n);
-		id('icons').childNodes[n].style.backgroundColor='#DDD';
-		// message(icons[n]);
-	}
-	else {
-		selection.splice(i,1);
-		id('icons').childNodes[n].style.backgroundColor='white';
-	}
-	console.log('selected: '+selection);
-})
-// check for Tags bookmarks
-var found=false;
+var html; // populate with icons
+var image;
+for(var i=0;i<icons.length;i++) {
+	console.log('add '+icons[i]);
+	html='<img src="icons/'+icons[i]+'.png" alt="'+icons[i]+'" class="icon"/>';
+	id('icons').innerHTML+=html;
+}
+var found=false; // check for Tags bookmarks
 chrome.bookmarks.search({title:'Tags'},
 (results)=>{
 	for(const result of results){
@@ -72,14 +28,55 @@ chrome.bookmarks.search({title:'Tags'},
 	if(found) console.log('Tags bookmarks folder exists - id: '+folder);
 	else makeFolder();
 });
-// populate with icons
-var html;
-var image;
-for(var i=0;i<icons.length;i++) {
-	console.log('add '+icons[i]);
-	html='<img src="icons/'+icons[i]+'.png" alt="'+icons[i]+'"/>';
-	id('icons').innerHTML+=html;
-}
+id('icons').addEventListener('click',function(event) { // tap icon
+	var x=event.x-5;
+	var y=event.y;
+	console.log('click at '+x+','+y);
+	x=Math.floor(x/50);
+	y=Math.floor(y/53);
+	console.log('icon '+x+' on row '+y);
+	var n=y*8+x;
+	console.log('icon '+n);
+	if((n<0)||(n>63)) {
+		message('miss!');
+		return;
+	}
+	var i=selection.indexOf(n);
+	if(i<0) {
+		selection.push(n);
+		id('icons').childNodes[n].style.backgroundColor='white';
+	}
+	else {
+		selection.splice(i,1);
+		id('icons').childNodes[n].style.backgroundColor='#DDD';
+	}
+	console.log('selected: '+selection);
+})
+id('tag').addEventListener('click',function(){ // save tagged bookmark
+	if(tab.title.length>30) tab.title=tab.title.substr(0,28)+'..';
+	if(selection.length<1) return;
+	for(var i=0;i<selection.length;i++) {
+		console.log('select '+icons[selection[i]]);
+		tab.title+='$'+icons[selection[i]];
+	}
+	console.log('title: '+tab.title+'\nurl: '+tab.url);
+	addBookmark(folder,tab.title,tab.url);
+	message('tagged');
+	window.setTimeout(function(){window.close();},1500);
+});
+id('find').addEventListener('click',function() { // find bookmarks with matching tags
+	checklist=[];
+	for(var i=0;i<selection.length;i++) {
+		console.log('add label $'+icons[selection[i]]);
+		checklist.push(icons[selection[i]]);
+	}
+	console.log('get bookmarks in Tags folder - id: '+folder);
+	chrome.bookmarks.getChildren(folder).then(listMatches);
+});
+id('close').addEventListener('click',function() { // close bookmarks list
+	for(var i=0;i<icons.length;i++) id('icons').childNodes[i].style.backgroundColor='#DDD';
+	id('listPage').style.display='none';
+});
 function makeFolder() { // create special bookmarks folder
 	chrome.bookmarks.create({title: 'Tags'},
 	()=>{console.log('bookmark folder added');}
@@ -101,7 +98,7 @@ function listMatches(bookmarks) {
 	var match=false;
 	var found=0;
 	var listItem;
-	var html='<b>Search for</b>';
+	var html='<b>tagged with...</b>';
 	for(var i in selection) html+='<img src="icons/'+icons[selection[i]]+'.png" align="middle" >';
 	id('listHeader').innerHTML=html;
 	id('list').innerHTML='';
@@ -118,14 +115,15 @@ function listMatches(bookmarks) {
 			listItem=document.createElement('li');
 			listItem.index=i; // index in bookmarks
 			html=page.substring(0,page.indexOf('$'));
-			html+='<img src="icons/close.png" class="deleteIcon">';
+			html+='<img src="close.png" class="deleteIcon">';
 			html+='<br><small>'+url.substring(0,50)+'</small>';
 			listItem.innerHTML=html;
 			listItem.addEventListener('click',function(e) {
 				var item=bookmarks[this.index];
-				if(e.x>380) {
+				if(e.x>350) {
 					chrome.bookmarks.remove(bookmarks[this.index].id);
 					bookmarks.splice(this.index,1);
+					id('listPage').style.display='none';
 					window.close();
 					return;
 				}
